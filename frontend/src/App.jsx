@@ -22,6 +22,12 @@ function App() {
     m => m.toLowerCase() === 'fido2authenticationmethod'
   );
 
+ const methodNamesMap = {
+  passwordAuthenticationMethod: 'Password Authentication',
+  phoneAuthenticationMethod: 'Phone'
+  // puedes añadir más métodos si los necesitas
+};
+
   return (
     <div>
       <h1>Passwordless Portal</h1>
@@ -34,6 +40,14 @@ function App() {
           <li key={m.type}>{m.type}: {m.displayName} {m.phoneNumber}</li>
         ))}
       </ul>
+
+<ul>
+  {data.availableMethods.map(m => (
+    <li key={m.type}>
+      {methodNamesMap[m.type] || m.type}: {m.displayName} {m.phoneNumber}
+    </li>
+  ))}
+</ul>
 
       <h2>Required Authentication Method:</h2>
       <ul>
