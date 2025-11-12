@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import "./style.css";
+import "./style.css"
 
 function App() {
   const [data, setData] = useState(null);
