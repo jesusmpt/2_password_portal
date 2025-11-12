@@ -33,13 +33,34 @@ export default async function (context, req) {
 
     // Métodos de autenticación
     const methodsResponse = await client.api(`/users/${userId}/authentication/methods`).get();
+	
+    // Métodos de teléfono
+    const phoneResponse = await client.api(`/users/${userId}/authentication/phoneMethods`).get();
 
-    const availableMethods = methodsResponse.value.map(m => ({
-      type: m['@odata.type'].split('.').pop(),
-      displayName: m.displayName || '',
-      phoneNumber: m.phoneNumber || '',
-      isDefault: m.isDefault || false // algunos métodos tienen esta propiedad
-    }));
+        //  Unimos los resultados
+    const availableMethods = [
+      ...methodsResponse.value.map(m => ({
+        type: m['@odata.type'].split('.').pop(),
+        displayName: m.displayName || '',
+        phoneNumber: m.phoneNumber || '',
+        isDefault: m.isDefault || false // algunos métodos tienen esta propiedad
+      })),
+      ...phoneResponse.value.map(p => ({
+        type: 'phoneAuthenticationMethod',
+        displayName: p.displayName || '',
+        phoneNumber: p.phoneNumber || '',
+        methodType: p.phoneType
+      }))
+    ];   
+
+        // Identificamos los métodos relevantes
+    const passwordlessMethods = [
+      'microsoftAuthenticatorAuthenticationMethod'
+    ];
+
+    const missing = passwordlessMethods.filter(
+      m => !availableMethods.some(am => am.type.toLowerCase() === m.toLowerCase())
+    );
 
     // Detectar si tiene MFA habilitado
     const mfaMethods = availableMethods.filter(m =>
