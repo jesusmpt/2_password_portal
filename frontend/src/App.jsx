@@ -14,10 +14,17 @@ function App() {
   if (!data) return <p>Loading...</p>;
   if (data.error) return <p>Error fetching data: {data.error}</p>;
 
+  // Filtrar los métodos faltantes
+  const requiredAuthMethod = data.missingPasswordless.filter(
+    m => m.toLowerCase() === 'microsoftauthenticatorauthenticationmethod'
+  );
+  const alternativeAuthMethod = data.missingPasswordless.filter(
+    m => m.toLowerCase() === 'fido2authenticationmethod'
+  );
+
   return (
     <div>
       <h1>Passwordless Portal</h1>
-
       <h2>User:</h2>
       <p>{data.user.displayName} ({data.user.userPrincipalName})</p>
 
@@ -28,12 +35,17 @@ function App() {
         ))}
       </ul>
 
-      <h2>Missing Passwordless Methods:</h2>
+      <h2>Required Authentication Method:</h2>
       <ul>
-        {data.missingPasswordless.map(m => <li key={m}>{m}</li>)}
+        {requiredAuthMethod.map(m => <li key={m}>Authenticator Application Method</li>)}
       </ul>
 
-      <button onClick={() => window.location.reload()}>Check Again</button>
+      <h2>Alternative Authentication Method:</h2>
+      <ul>
+        {alternativeAuthMethod.map(m => <li key={m}>Fido2 Security Keys Method</li>)}
+      </ul>
+
+      <button onClick={() => window.location.reload()}>Check again</button>
     </div>
   );
 }
