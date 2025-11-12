@@ -1,0 +1,67 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #004080;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+header img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+  color: #004080;
+}
+
+.method-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+}
+
+.required {
+  background-color: #d1e7dd;
+  border-color: #0f5132;
+}
+
+.alternative {
+  background-color: #fff3cd;
+  border-color: #664d03;
+}
+
+.missing {
+  background-color: #f8d7da;
+  border-color: #842029;
+}
+
+button {
+  background-color: #004080;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #00264d;
+}
