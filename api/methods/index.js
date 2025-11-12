@@ -3,9 +3,9 @@ import 'isomorphic-fetch';
 
 export default async function (context, req) {
   try {
-    const tenantId = '9ff87f7c-8358-46b5-88bc-d73c09ce789f';
-    const clientId = '8dcec823-8928-41f7-a9b5-e85db1dc6c12';
-    const clientSecret = 'fcy8Q~E2wPa6u5EyxLOrbS4Pp8dePnFbMFkQXc7Y';
+    const tenantId = process.env.AZURE_TENANT_ID;
+    const clientId = process.env.AZURE_CLIENT_ID;
+    const clientSecret = process.env.AZURE_CLIENT_SECRET;
 
     const tokenResponse = await fetch(\https://login.microsoftonline.com/\/oauth2/v2.0/token\, {
       method:'POST',
