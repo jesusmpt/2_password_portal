@@ -2,44 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import "./style.css"
-
-function App() {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    fetch("/api/methods")
-      .then((res) => res.json())
-      .then((d) => setData(d))
-      .catch(() => setError("Cannot connect to API"));
-  }, []);
-
-  // Enviar log de progreso (opcional) cuando hay datos
-  useEffect(() => {
-    if (data && !data.error) {
-      const hasAuthenticator = data.availableMethods.some(
-        (m) => m.type === "microsoftAuthenticatorAuthenticationMethod"
-      );
-      const hasPhone = data.availableMethods.some(
-        (m) => m.type === "phoneAuthenticationMethod"
-      );
-      const hasWHfB = data.hasWHfB;
-
-      // score calc (matching frontend logic)
-      let score = 0;
-      if (hasAuthenticator) score += 60;
-      if (data.hasMFA || hasPhone) score += 25;
-      if (hasWHfB) score += 15;
-
-      const payload = {
-        user: data.user,
-        score,
-        hasAuthenticator,
-        hasPhone,
-        hasMFA: data.hasMFA,
-        hasWHfB,
-      };
+import "./style.css";
 
       fetch("/api/logUserProgress", {
         method: "POST",
