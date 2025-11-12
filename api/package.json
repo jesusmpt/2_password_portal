@@ -1,0 +1,9 @@
+{
+  "name": "passwordless-api",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@microsoft/microsoft-graph-client": "^3.0.0",
+    "isomorphic-fetch": "^3.0.0"
+  }
+}
