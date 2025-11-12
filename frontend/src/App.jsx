@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import LogoutButton from "./components/LogoutButton";
 
 export default function App() {
   const [data, setData] = useState(null);
@@ -26,44 +25,65 @@ export default function App() {
   const user = data.user || {};
   const methods = data.availableMethods || [];
 
-  const requiredAuth = methods.filter(
+  // Detectar métodos
+  const authenticator = methods.find(
     (m) => m.type === "microsoftAuthenticatorAuthenticationMethod"
   );
-  const alternativeAuth = methods.filter(
-    (m) => m.type === "fido2AuthenticationMethod"
-  );
-
   const phone = methods.find((m) => m.type === "phoneAuthenticationMethod");
   const password = methods.find((m) => m.type === "passwordAuthenticationMethod");
+
+  // Método por defecto
+  const defaultMethod = methods.find((m) => m.isDefault);
+  const defaultMethodName = defaultMethod
+    ? defaultMethod.type === "microsoftAuthenticatorAuthenticationMethod"
+      ? "Authenticator App"
+      : defaultMethod.type === "phoneAuthenticationMethod"
+      ? "Phone"
+      : defaultMethod.type === "passwordAuthenticationMethod"
+      ? "Password"
+      : defaultMethod.type
+    : "-";
+
+  // Detectar si Passwordless está activo
+  const passwordlessActive = data.hasMFA && authenticator;
+
+  // Barra de progreso
+  const totalSteps = 2; // MFA + Passwordless
+  let completedSteps = 0;
+  if (data.hasMFA) completedSteps++;
+  if (passwordlessActive) completedSteps++;
+
+  const progressPercentage = (completedSteps / totalSteps) * 100;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <header className="flex justify-between items-center bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <img
-            src="https://astara.com/themes/custom/astara/logo.svg"
-            alt="Astara Logo"
-            className="h-8"
-          />
-          <h1 className="text-2xl font-semibold text-gray-800">
-            Passwordless Portal
-          </h1>
-        </div>
-        <LogoutButton />
+      <header className="flex items-center bg-white p-4 shadow-sm gap-3">
+        <img
+          src="https://astara.com/themes/custom/astara/logo.svg"
+          alt="Astara Logo"
+          className="h-8"
+        />
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Passwordless Portal
+        </h1>
       </header>
 
-      {/* Content */}
       <main className="flex-1 p-6 max-w-3xl mx-auto bg-white rounded-xl shadow-sm mt-6">
-        <h2 className="text-xl font-bold mb-4 text-gray-800">
-          User Information
-        </h2>
-        <div className="space-y-2 text-gray-700">
+        {/* Información del usuario */}
+        <section className="mb-6 p-4 bg-gray-100 rounded-lg">
+          <h2 className="text-xl font-bold mb-2 text-gray-800">User Summary</h2>
           <p>
             <strong>Name:</strong> {user.givenName || "-"} {user.surname || ""}
           </p>
           <p>
             <strong>Email:</strong> {user.mail || user.userPrincipalName}
+          </p>
+          <p>
+            <strong>Phone:</strong> {phone ? phone.phoneNumber : "-"}
+          </p>
+          <p>
+            <strong>Default Authentication:</strong> {defaultMethodName}
           </p>
           <p>
             <strong>MFA Enabled:</strong> {data.hasMFA ? "Yes" : "No"}
@@ -72,70 +92,89 @@ export default function App() {
             <strong>Windows Hello for Business:</strong>{" "}
             {data.hasWHfB ? "Enabled" : "Not enabled"}
           </p>
-          {phone && (
-            <p>
-              <strong>Phone Number:</strong> {phone.phoneNumber}
+        </section>
+
+        {/* Passwordless Progress */}
+        <section className="mb-6">
+          <h2 className="text-xl font-bold mb-2 text-gray-800">Passwordless Progress</h2>
+          <div className="w-full h-6 bg-gray-300 rounded-lg overflow-hidden">
+            <div
+              className="h-full bg-green-500 transition-all duration-300"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+          <p className="mt-2">{completedSteps} of {totalSteps} steps completed</p>
+          {passwordlessActive && <p className="text-green-600 mt-1">✅ Passwordless is ACTIVE</p>}
+        </section>
+
+        {/* Authenticator Method */}
+        <section className="mb-6">
+          <h2 className="text-xl font-bold mb-2 text-gray-800">Required Authentication Method</h2>
+          {authenticator ? (
+            <ul className="list-disc ml-6 text-gray-700">
+              <li>
+                Authenticator App Method (Device: {authenticator.displayName || "Unknown"})
+              </li>
+            </ul>
+          ) : (
+            <p className="text-yellow-600">
+              ❗ Microsoft Authenticator not yet configured.{" "}
+              <a
+                href="https://mysignins.microsoft.com/security-info"
+                className="underline text-blue-600"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Configure it here
+              </a>
+              .
             </p>
           )}
-        </div>
+        </section>
 
-        <hr className="my-6" />
+        {/* Password / Passwordless status */}
+        <section>
+          <h2 className="text-xl font-bold mb-2 text-gray-800">Traditional Sign-in Method</h2>
+          {password ? (
+            <p className="text-gray-700">Password authentication method detected.</p>
+          ) : (
+            <p className="text-green-600">✅ Passwordless mode active. You’re secure!</p>
+          )}
+        </section>
 
-        <h2 className="text-xl font-bold mb-4 text-gray-800">
-          Required Authentication Method
-        </h2>
-        {requiredAuth.length > 0 ? (
-          <ul className="list-disc ml-6 text-gray-700">
-            <li>Authenticator Application Method</li>
-          </ul>
-        ) : (
-          <p className="text-yellow-600">
-            ❗ Microsoft Authenticator not yet configured.{" "}
-            <a
-              href="https://mysignins.microsoft.com/security-info"
-              className="underline text-blue-600"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Configure it here
-            </a>
-            .
-          </p>
-        )}
-
-        <h2 className="text-xl font-bold mt-8 mb-4 text-gray-800">
-          Alternative Authentication Method
-        </h2>
-        {alternativeAuth.length > 0 ? (
-          <ul className="list-disc ml-6 text-gray-700">
-            <li>FIDO2 Security Keys Method</li>
-          </ul>
-        ) : (
-          <p className="text-yellow-600">
-            ⚙️ You can also add FIDO2 security keys.{" "}
-            <a
-              href="https://mysignins.microsoft.com/security-info"
-              className="underline text-blue-600"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Add a key
-            </a>
-            .
-          </p>
-        )}
-
-        <h2 className="text-xl font-bold mt-8 mb-4 text-gray-800">
-          Traditional Sign-in Method
-        </h2>
-        {password ? (
-          <p className="text-gray-700">
-            Password authentication method detected.
-          </p>
-        ) : (
-          <p className="text-green-600">
-            ✅ Passwordless mode active. You’re secure!
-          </p>
+        {/* Next steps */}
+        {!passwordlessActive && (
+          <section className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h2 className="text-xl font-bold mb-2 text-gray-800">Next Steps</h2>
+            <ul className="list-disc ml-6 text-gray-700">
+              {!data.hasMFA && (
+                <li>
+                  Enable MFA:{" "}
+                  <a
+                    href="https://myaccount.microsoft.com/security-info"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-blue-600"
+                  >
+                    Go to Security Info
+                  </a>
+                </li>
+              )}
+              {!authenticator && (
+                <li>
+                  Register Authenticator App:{" "}
+                  <a
+                    href="https://aka.ms/mfasetup"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-blue-600"
+                  >
+                    Setup Authenticator
+                  </a>
+                </li>
+              )}
+            </ul>
+          </section>
         )}
       </main>
     </div>
