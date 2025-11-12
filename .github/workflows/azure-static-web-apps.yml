@@ -1,3 +1,4 @@
+
 name: Azure Static Web Apps CI/CD
 
 on:
@@ -12,30 +13,45 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
+    name: Build and Deploy
     steps:
-      - name: Checkout GitHub repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: 18
 
-      - name: Install Frontend Dependencies
+      - name: Install dependencies
         working-directory: frontend
         run: npm install
 
-      - name: Build Frontend
+      - name: Fix vite permissions
+        working-directory: frontend
+        run: chmod +x ./node_modules/.bin/vite
+
+      - name: Verify vite install
+        working-directory: frontend
+        run: npx vite --version
+
+      - name: Build frontend
         working-directory: frontend
         run: npm run build
 
-      - name: Deploy to Azure Static Web App
+      - name: Upload artifact for debugging
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-folder
+          path: frontend/dist
+
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WITTY_SEA_04D5CEA03 }}
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "frontend"
-          api_location: "api"
           output_location: "dist"
+          api_location: "api"
