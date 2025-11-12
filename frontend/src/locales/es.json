@@ -1,0 +1,8 @@
+{
+  "title": "Portal de Autenticación Sin Contraseña",
+  "loading": "Cargando...",
+  "error": "Error al cargar la información",
+  "methods": "Métodos de Autenticación",
+  "missing": "Métodos Sin Contraseña Faltantes",
+  "user": "Información del Usuario"
+}

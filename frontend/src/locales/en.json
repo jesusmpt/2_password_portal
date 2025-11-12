@@ -1,0 +1,8 @@
+{
+  "title": "Passwordless Authentication Portal",
+  "loading": "Loading...",
+  "error": "Error loading data",
+  "methods": "Authentication Methods",
+  "missing": "Missing Passwordless Methods",
+  "user": "User Information"
+}
