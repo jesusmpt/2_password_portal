@@ -1,6 +1,6 @@
 body {
   font-family: "Segoe UI", Arial, sans-serif;
-  background-color: #f7f9fc;
+  background-color: #f4f7fb;
   color: #222;
   margin: 0;
   padding: 0;
@@ -8,19 +8,19 @@ body {
 
 header {
   background: white;
-  border-bottom: 3px solid #004b8d;
-  padding: 15px 25px;
+  border-bottom: 4px solid #004b8d;
+  padding: 20px 30px;
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
 .logo {
-  height: 40px;
+  height: 42px;
 }
 
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 30px auto;
   padding: 20px;
 }
@@ -28,14 +28,39 @@ header {
 .card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
   padding: 20px;
   margin-bottom: 20px;
+}
+
+.progress-bar {
+  height: 28px;
+  background: #e0e0e0;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #004b8d, #0078d7);
+  color: white;
+  text-align: center;
+  line-height: 28px;
+  font-weight: bold;
+  transition: width 0.8s ease-in-out;
 }
 
 .ok { color: #2e7d32; font-weight: bold; }
 .warn { color: #f9a825; font-weight: bold; }
 .fail { color: #c62828; font-weight: bold; }
+
+a {
+  color: #004b8d;
+  text-decoration: none;
+  font-weight: bold;
+}
+a:hover { text-decoration: underline; }
 
 .refresh {
   background: #004b8d;
@@ -45,6 +70,8 @@ header {
   font-size: 16px;
   border-radius: 6px;
   cursor: pointer;
+  display: block;
+  margin: 0 auto;
 }
 
 .refresh:hover {

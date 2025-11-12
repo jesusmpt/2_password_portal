@@ -14,7 +14,7 @@ function App() {
   }, []);
 
   if (error) return <p className="error">{error}</p>;
-  if (!data) return <p className="loading">Loading user security profile...</p>;
+  if (!data) return <p className="loading">Evaluando el estado de seguridad...</p>;
   if (data.error) return <p className="error">{data.error}</p>;
 
   const hasAuthenticator = data.availableMethods.some(
@@ -23,9 +23,45 @@ function App() {
   const hasFido2 = data.availableMethods.some(
     (m) => m.type === "fido2AuthenticationMethod"
   );
+  const hasPhone = data.availableMethods.some(
+    (m) => m.type === "phoneAuthenticationMethod"
+  );
+  const hasWHfB = data.hasWHfB;
 
-  const passwordlessReady = hasAuthenticator;
-  const fidoSuggestion = !hasFido2 && passwordlessReady;
+  // --- Progreso Passwordless ---
+  let score = 0;
+  if (hasAuthenticator) score += 40;
+  if (data.hasMFA || hasPhone) score += 20;
+  if (hasWHfB) score += 20;
+  if (hasFido2) score += 20;
+
+  const ready = score >= 80;
+
+  const missingSteps = [];
+  if (!hasAuthenticator)
+    missingSteps.push({
+      name: "Registrar Authenticator App",
+      desc: "Configura la aplicación Microsoft Authenticator en tu dispositivo móvil.",
+      link: "https://aka.ms/mfasetup",
+    });
+  if (!data.hasMFA && !hasPhone)
+    missingSteps.push({
+      name: "Configurar MFA (Segundo factor)",
+      desc: "Añade un método de verificación adicional, como teléfono o Authenticator.",
+      link: "https://mysignins.microsoft.com/security-info",
+    });
+  if (!hasWHfB)
+    missingSteps.push({
+      name: "Configurar Windows Hello for Business",
+      desc: "Activa la autenticación biométrica (PIN o rostro) en tu equipo Windows.",
+      link: "https://learn.microsoft.com/windows/security/identity-protection/hello-for-business/",
+    });
+  if (!hasFido2)
+    missingSteps.push({
+      name: "Registrar clave de seguridad FIDO2",
+      desc: "Agrega una llave física (YubiKey o similar) para un acceso 100% sin contraseña.",
+      link: "https://aka.ms/mysecurityinfo",
+    });
 
   return (
     <div className="container">
@@ -35,72 +71,58 @@ function App() {
           alt="Astara"
           className="logo"
         />
-        <h1>Passwordless Readiness Portal</h1>
+        <h1>Portal de Madurez Passwordless</h1>
       </header>
 
       <section className="card user">
-        <h2>User Identity</h2>
-        <p><strong>Name:</strong> {data.user.displayName}</p>
+        <h2>Identidad del usuario</h2>
+        <p><strong>Nombre:</strong> {data.user.displayName}</p>
         <p><strong>UPN:</strong> {data.user.userPrincipalName}</p>
         {data.user.mail && <p><strong>Email:</strong> {data.user.mail}</p>}
       </section>
 
+      <section className="card progress">
+        <h2>Progreso hacia Passwordless</h2>
+        <div className="progress-bar">
+          <div className="progress-fill" style={{ width: `${score}%` }}>
+            {score}%
+          </div>
+        </div>
+        <p>
+          {ready ? (
+            <span className="ok">✅ Completado: Ya puedes iniciar sesión sin contraseña</span>
+          ) : (
+            <span className="warn">⚙️ En progreso: Completa los pasos siguientes para alcanzar el nivel Passwordless</span>
+          )}
+        </p>
+      </section>
+
+      {!ready && (
+        <section className="card nextsteps">
+          <h2>Pasos recomendados</h2>
+          <ul>
+            {missingSteps.map((s) => (
+              <li key={s.name}>
+                <strong>{s.name}</strong>: {s.desc}{" "}
+                <a href={s.link} target="_blank" rel="noopener noreferrer">
+                  Configurar →
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section className="card status">
-        <h2>Security Overview</h2>
-        <p>
-          <strong>MFA Enabled:</strong>{" "}
-          {data.hasMFA ? (
-            <span className="ok">✅ Enabled</span>
-          ) : (
-            <span className="fail">❌ Disabled</span>
-          )}
-        </p>
-        {data.mfaDevice && <p><strong>MFA Device:</strong> {data.mfaDevice}</p>}
-        {data.mfaPhone && <p><strong>Phone:</strong> {data.mfaPhone}</p>}
-        <p>
-          <strong>Windows Hello for Business:</strong>{" "}
-          {data.hasWHfB ? (
-            <span className="ok">✅ Registered</span>
-          ) : (
-            <span className="warn">⚠️ Not configured</span>
-          )}
-        </p>
-      </section>
-
-      <section className="card methods">
-        <h2>Authentication Methods</h2>
-        <ul>
-          {data.availableMethods.map((m) => (
-            <li key={m.type}>
-              <strong>{m.name}</strong>{" "}
-              {m.phoneNumber && `(${m.phoneNumber})`}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="card readiness">
-        <h2>Passwordless Readiness</h2>
-        {passwordlessReady ? (
-          <p className="ok">
-            ✅ Passwordless capable. Authenticator App configured.
-          </p>
-        ) : (
-          <p className="fail">
-            ❌ Missing Authenticator App. Please register it in your security
-            settings.
-          </p>
-        )}
-
-        {fidoSuggestion && (
-          <p className="warn">
-            ⚠️ Consider adding a FIDO2 Security Key for enhanced security.
-          </p>
-        )}
+        <h2>Resumen de Seguridad</h2>
+        <p><strong>MFA:</strong> {data.hasMFA ? "✅ Habilitado" : "❌ No habilitado"}</p>
+        <p><strong>Authenticator:</strong> {hasAuthenticator ? "✅ Configurado" : "❌ Faltante"}</p>
+        <p><strong>FIDO2:</strong> {hasFido2 ? "✅ Configurado" : "⚠️ Opcional"}</p>
+        <p><strong>Windows Hello:</strong> {hasWHfB ? "✅ Activo" : "❌ No configurado"}</p>
       </section>
 
       <button className="refresh" onClick={() => window.location.reload()}>
-        Refresh
+        🔄 Re-evaluar
       </button>
     </div>
   );
