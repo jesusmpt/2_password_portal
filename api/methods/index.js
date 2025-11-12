@@ -24,18 +24,31 @@ export default async function (context, req) {
     const client = Client.init({ authProvider: done => done(null, accessToken) });
 
     const userId = req.headers['x-ms-client-principal-id'];
+
+    // Información básica del usuario
     const user = await client
       .api(`/users/${userId}`)
       .select('displayName,givenName,surname,mail,userPrincipalName')
       .get();
 
+    // Métodos de autenticación
     const methodsResponse = await client.api(`/users/${userId}/authentication/methods`).get();
 
     const availableMethods = methodsResponse.value.map(m => ({
       type: m['@odata.type'].split('.').pop(),
       displayName: m.displayName || '',
-      phoneNumber: m.phoneNumber || ''
+      phoneNumber: m.phoneNumber || '',
+      isDefault: m.isDefault || false // algunos métodos tienen esta propiedad
     }));
+
+    // Detectar si tiene MFA habilitado
+    const mfaMethods = availableMethods.filter(m =>
+      ['microsoftAuthenticatorAuthenticationMethod', 'phoneAuthenticationMethod', 'softwareOathAuthenticationMethod'].includes(m.type)
+    );
+    const hasMFA = mfaMethods.length > 0;
+
+    // Detectar Windows Hello for Business
+    const hasWHfB = availableMethods.some(m => m.type === 'windowsHelloForBusinessAuthenticationMethod');
 
     const passwordlessMethods = ['fido2AuthenticationMethod', 'microsoftAuthenticatorAuthenticationMethod'];
     const missing = passwordlessMethods.filter(
@@ -44,7 +57,13 @@ export default async function (context, req) {
 
     context.res = {
       status: 200,
-      body: { user, availableMethods, missingPasswordless: missing }
+      body: {
+	user,
+        availableMethods,
+        missingPasswordless: missing,
+        hasMFA,
+        hasWHfB 
+       }
     };
   } catch (error) {
     console.error(error);

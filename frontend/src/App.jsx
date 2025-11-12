@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
+const methodNamesMap = {
+  microsoftAuthenticatorAuthenticationMethod: 'Authenticator Application Method',
+  fido2AuthenticationMethod: 'FIDO2 Security Keys Method',
+  passwordAuthenticationMethod: 'Password Authentication',
+  windowsHelloForBusinessAuthenticationMethod: 'Windows Hello for Business',
+  phoneAuthenticationMethod: 'Phone Authentication'
+};
+
 function App() {
   const [data, setData] = useState(null);
 
@@ -14,52 +22,40 @@ function App() {
   if (!data) return <p>Loading...</p>;
   if (data.error) return <p>Error fetching data: {data.error}</p>;
 
-  // Filtrar los métodos faltantes
-  const requiredAuthMethod = data.missingPasswordless.filter(
-    m => m.toLowerCase() === 'microsoftauthenticatorauthenticationmethod'
-  );
-  const alternativeAuthMethod = data.missingPasswordless.filter(
-    m => m.toLowerCase() === 'fido2authenticationmethod'
-  );
-
- const methodNamesMap = {
-  passwordAuthenticationMethod: 'Password Authentication',
-  phoneAuthenticationMethod: 'Phone'
-  // puedes añadir más métodos si los necesitas
-};
+  const requiredMethod = data.availableMethods.find(m => m.type === 'microsoftAuthenticatorAuthenticationMethod');
+  const alternativeMethod = data.availableMethods.find(m => m.type === 'fido2AuthenticationMethod');
+  const passwordMethod = data.availableMethods.find(m => m.type === 'passwordAuthenticationMethod');
 
   return (
     <div>
       <h1>Passwordless Portal</h1>
-      <h2>User:</h2>
-      <p>{data.user.displayName} ({data.user.userPrincipalName})</p>
 
-      <h2>Authentication Methods:</h2>
+      <h2>User Info</h2>
+      <p>Name: {data.user.givenName} {data.user.surname}</p>
+      <p>Email: {data.user.mail || data.user.userPrincipalName}</p>
+      <p>MFA Enabled: {data.hasMFA ? 'Yes' : 'No'}</p>
+      <p>Windows Hello for Business: {data.hasWHfB ? 'Yes' : 'No'}</p>
+
+      <h2>Available Authentication Methods</h2>
       <ul>
         {data.availableMethods.map(m => (
-          {methodNamesMap[m.type] || m.type}: {m.displayName} {m.phoneNumber}
+          <li key={m.type}>{methodNamesMap[m.type] || m.type}</li>
         ))}
       </ul>
 
-<ul>
-  {data.availableMethods.map(m => (
-    <li key={m.type}>
-      {methodNamesMap[m.type] || m.type}: {m.displayName} {m.phoneNumber}
-    </li>
-  ))}
-</ul>
+      <h2>Required Authentication Method</h2>
+      <p>{requiredMethod ? methodNamesMap[requiredMethod.type] : 'None'}</p>
 
-      <h2>Required Authentication Method:</h2>
+      <h2>Alternative Authentication Method</h2>
+      <p>{alternativeMethod ? methodNamesMap[alternativeMethod.type] : 'None'}</p>
+
+      <h2>Password Method</h2>
+      <p>{passwordMethod ? methodNamesMap[passwordMethod.type] : 'None'}</p>
+
+      <h2>Missing Passwordless Methods</h2>
       <ul>
-        {requiredAuthMethod.map(m => <li key={m}>Authenticator Application Method</li>)}
+        {data.missingPasswordless.map(m => <li key={m}>{methodNamesMap[m] || m}</li>)}
       </ul>
-
-      <h2>Alternative Authentication Method:</h2>
-      <ul>
-        {alternativeAuthMethod.map(m => <li key={m}>Fido2 Security Keys Method</li>)}
-      </ul>
-
-      <button onClick={() => window.location.reload()}>Check again</button>
     </div>
   );
 }
