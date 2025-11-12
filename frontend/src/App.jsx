@@ -1,181 +1,132 @@
+// frontend/src/App.jsx
 import React, { useEffect, useState } from "react";
+import "./style.css";
 
 export default function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("/api/methods")
       .then((res) => res.json())
-      .then((info) => {
-        setData(info);
+      .then((d) => {
+        setData(d);
         setLoading(false);
       })
       .catch((err) => {
         console.error(err);
-        setData({ error: "Unable to fetch data" });
+        setError("Cannot connect to API");
         setLoading(false);
       });
   }, []);
 
-  if (loading) return <p className="p-8 text-gray-700">Loading...</p>;
-  if (data?.error)
-    return <p className="p-8 text-red-600">Error: {data.error}</p>;
+  if (loading) return <p className="loading">Evaluating security posture...</p>;
+  if (error) return <p className="error">{error}</p>;
+  if (data?.error) return <p className="error">{data.error}</p>;
 
-  const user = data.user || {};
+  const user = data.user;
   const methods = data.availableMethods || [];
 
-  // Detectar métodos
-  const authenticator = methods.find(
-    (m) => m.type === "microsoftAuthenticatorAuthenticationMethod"
-  );
-  const phone = methods.find((m) => m.type === "phoneAuthenticationMethod");
-  const password = methods.find((m) => m.type === "passwordAuthenticationMethod");
+  // Detect methods
+  const authenticator = methods.find(m => m.type === "microsoftAuthenticatorAuthenticationMethod");
+  const phone = methods.find(m => m.type === "phoneAuthenticationMethod");
+  const hasWHfB = data.hasWHfB;
+  const hasMFA = data.hasMFA;
 
-  // Método por defecto
-  const defaultMethod = methods.find((m) => m.isDefault);
-  const defaultMethodName = defaultMethod
-    ? defaultMethod.type === "microsoftAuthenticatorAuthenticationMethod"
-      ? "Authenticator App"
-      : defaultMethod.type === "phoneAuthenticationMethod"
-      ? "Phone"
-      : defaultMethod.type === "passwordAuthenticationMethod"
-      ? "Password"
-      : defaultMethod.type
-    : "-";
+  // Score y barra de progreso
+  let score = 0;
+  if (authenticator) score += 60;
+  if (hasMFA || phone) score += 25;
+  if (hasWHfB) score += 15;
+  const ready = score >= 80;
 
-  // Detectar si Passwordless está activo
-  const passwordlessActive = data.hasMFA && authenticator;
-
-  // Barra de progreso
-  const totalSteps = 2; // MFA + Passwordless
-  let completedSteps = 0;
-  if (data.hasMFA) completedSteps++;
-  if (passwordlessActive) completedSteps++;
-
-  const progressPercentage = (completedSteps / totalSteps) * 100;
+  // Pasos recomendados
+  const steps = [];
+  if (!authenticator) steps.push({
+    id: "auth-app",
+    title: "Register Microsoft Authenticator",
+    desc: "Install and register Microsoft Authenticator (recommended primary passwordless method).",
+    link: "https://mysignins.microsoft.com/security-info"
+  });
+  if (!hasMFA && !phone) steps.push({
+    id: "mfa",
+    title: "Enable Multi-Factor Authentication (MFA)",
+    desc: "Add an extra verification method (phone or authenticator).",
+    link: "https://mysignins.microsoft.com/security-info"
+  });
+  if (!hasWHfB) steps.push({
+    id: "whfb",
+    title: "Configure Windows Hello for Business",
+    desc: "Set up Windows Hello (PIN/biometrics) on your Windows device.",
+    link: "https://learn.microsoft.com/windows/security/identity-protection/hello-for-business/"
+  });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="flex items-center bg-white p-4 shadow-sm gap-3">
-        <img
-          src="https://astara.com/themes/custom/astara/logo.svg"
-          alt="Astara Logo"
-          className="h-8"
-        />
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Passwordless Portal
-        </h1>
+    <div className="page">
+      <header className="header">
+        <div className="branding">
+          <img src="https://astara.com/themes/custom/astara/logo.svg" alt="Astara" className="logo" />
+          <h1>Passwordless Readiness</h1>
+        </div>
       </header>
 
-      <main className="flex-1 p-6 max-w-3xl mx-auto bg-white rounded-xl shadow-sm mt-6">
+      <main className="main">
         {/* Información del usuario */}
-        <section className="mb-6 p-4 bg-gray-100 rounded-lg">
-          <h2 className="text-xl font-bold mb-2 text-gray-800">User Summary</h2>
-          <p>
-            <strong>Name:</strong> {user.givenName || "-"} {user.surname || ""}
-          </p>
-          <p>
-            <strong>Email:</strong> {user.mail || user.userPrincipalName}
-          </p>
-          <p>
-            <strong>Phone:</strong> {phone ? phone.phoneNumber : "-"}
-          </p>
-          <p>
-            <strong>Default Authentication:</strong> {defaultMethodName}
-          </p>
-          <p>
-            <strong>MFA Enabled:</strong> {data.hasMFA ? "Yes" : "No"}
-          </p>
-          <p>
-            <strong>Windows Hello for Business:</strong>{" "}
-            {data.hasWHfB ? "Enabled" : "Not enabled"}
-          </p>
+        <section className="card">
+          <h2>User Information</h2>
+          <p><strong>Name:</strong> {user.displayName}</p>
+          <p><strong>UPN:</strong> {user.userPrincipalName}</p>
+          {user.mail && <p><strong>Email:</strong> {user.mail}</p>}
         </section>
 
-        {/* Passwordless Progress */}
-        <section className="mb-6">
-          <h2 className="text-xl font-bold mb-2 text-gray-800">Passwordless Progress</h2>
-          <div className="w-full h-6 bg-gray-300 rounded-lg overflow-hidden">
-            <div
-              className="h-full bg-green-500 transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
-            />
+        {/* Barra de progreso */}
+        <section className="card">
+          <h2>Passwordless Progress</h2>
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${score}%` }}>{score}%</div>
           </div>
-          <p className="mt-2">{completedSteps} of {totalSteps} steps completed</p>
-          {passwordlessActive && <p className="text-green-600 mt-1">✅ Passwordless is ACTIVE</p>}
+          <p className={ready ? "ok" : "warn"}>
+            {ready ? "✅ Compliant: you can sign in passwordless" : "⚙️ In progress: complete the recommended steps"}
+          </p>
         </section>
 
-        {/* Authenticator Method */}
-        <section className="mb-6">
-          <h2 className="text-xl font-bold mb-2 text-gray-800">Required Authentication Method</h2>
-          {authenticator ? (
-            <ul className="list-disc ml-6 text-gray-700">
-              <li>
-                Authenticator App Method (Device: {authenticator.displayName || "Unknown"})
-              </li>
-            </ul>
-          ) : (
-            <p className="text-yellow-600">
-              ❗ Microsoft Authenticator not yet configured.{" "}
-              <a
-                href="https://mysignins.microsoft.com/security-info"
-                className="underline text-blue-600"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Configure it here
-              </a>
-              .
-            </p>
-          )}
+        {/* Resumen de seguridad */}
+        <section className="card">
+          <h2>Security Summary</h2>
+          <ul>
+            <li><strong>MFA:</strong> {hasMFA ? "Enabled" : "Disabled"}</li>
+            <li><strong>Authenticator App:</strong> {authenticator ? `Registered (${authenticator.displayName || "Device"})` : "Not registered"}</li>
+            <li><strong>Phone (mobile):</strong> {phone ? `${phone.phoneNumber} (${phone.methodType || "mobile"})` : "Not registered"}</li>
+            <li><strong>Windows Hello:</strong> {hasWHfB ? "Configured" : "Not configured"}</li>
+            <li><strong>Default Sign-in Method:</strong> {methods.find(m => m.isDefault)?.type || "Unknown"}</li>
+          </ul>
         </section>
 
-        {/* Password / Passwordless status */}
-        <section>
-          <h2 className="text-xl font-bold mb-2 text-gray-800">Traditional Sign-in Method</h2>
-          {password ? (
-            <p className="text-gray-700">Password authentication method detected.</p>
-          ) : (
-            <p className="text-green-600">✅ Passwordless mode active. You’re secure!</p>
-          )}
-        </section>
-
-        {/* Next steps */}
-        {!passwordlessActive && (
-          <section className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h2 className="text-xl font-bold mb-2 text-gray-800">Next Steps</h2>
-            <ul className="list-disc ml-6 text-gray-700">
-              {!data.hasMFA && (
-                <li>
-                  Enable MFA:{" "}
-                  <a
-                    href="https://myaccount.microsoft.com/security-info"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline text-blue-600"
-                  >
-                    Go to Security Info
-                  </a>
+        {/* Pasos recomendados */}
+        {!ready && (
+          <section className="card">
+            <h2>Recommended Actions</h2>
+            <ul>
+              {steps.map(s => (
+                <li key={s.id} className="step">
+                  <div className="step-left">
+                    <strong>{s.title}</strong>
+                    <div className="desc">{s.desc}</div>
+                  </div>
+                  <div className="step-right">
+                    <a href={s.link} target="_blank" rel="noopener noreferrer" className="btn-link">Configure →</a>
+                  </div>
                 </li>
-              )}
-              {!authenticator && (
-                <li>
-                  Register Authenticator App:{" "}
-                  <a
-                    href="https://aka.ms/mfasetup"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline text-blue-600"
-                  >
-                    Setup Authenticator
-                  </a>
-                </li>
-              )}
+              ))}
             </ul>
           </section>
         )}
+
+        {/* Botón para re-evaluar */}
+        <div style={{ textAlign: "center", marginTop: 18 }}>
+          <button className="refresh" onClick={() => window.location.reload()}>Re-evaluate</button>
+        </div>
       </main>
     </div>
   );
