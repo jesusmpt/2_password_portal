@@ -35,12 +35,22 @@ export default function App() {
   const hasWHfB = data.hasWHfB;
   const hasMFA = data.hasMFA;
 
-  // Barra de progreso ponderada
-  let score = 0;
-  if (hasAuthenticator) score += 60;
-  if (hasMFA || hasPhone) score += 25;
-  if (hasWHfB) score += 15;
-  const ready = score >= 80;
+// Calcular progreso
+let score = 0;
+if (hasAuthenticator) score += 40;
+if (data.hasMFA || hasPhone) score += 30;
+if (hasWHfB) score += 30;
+
+const ready = hasWHfB && score >= 80; // WHfB obligatorio
+
+// Mostrar tipo de WHfB
+let whfbTypeText = "-";
+if (hasWHfB) {
+  const whfbMethod = methods.find(
+    (m) => m.type === "windowsHelloForBusinessAuthenticationMethod"
+  );
+  whfbTypeText = whfbMethod?.keyStrength || whfbMethod?.credentialType || "Configured";
+}
 
   // Método por defecto
   const defaultMethod = methods.find((m) => m.isDefault);
@@ -115,49 +125,70 @@ export default function App() {
         </section>
 
         {/* Resumen de seguridad */}
-        <section className="card fade-in">
-          <h2>Security Summary</h2>
-          <ul>
-            <li>
-              <strong>Default Sign-in Method:</strong> {defaultMethod ? defaultMethod.type : "Unknown"}
-              {defaultMethod && (
-                <span>
-                  {isRecommendedDefault ? " ✅ Recommended" : " ⚠️ Consider switching to Microsoft Authenticator"}
-                </span>
-              )}
-            </li>
-            <li><strong>MFA Enabled:</strong> {hasMFA ? "Yes" : "No"}</li>
-            <li>
-              <strong>Authenticator App:</strong> {hasAuthenticator ? "Registered" : "Not registered"}
-              {authenticatorDevices.map((a, idx) => (
-                <ul key={idx} className="sub-list">
-                  <li>Device: {a.displayName || "-"}</li>
-                  <li>Registered On: {a.createdDateTime ? new Date(a.createdDateTime).toLocaleString() : "-"}</li>
-                  <li>Notifications Enabled: {a.isNotificationEnabled ? "Yes" : "Unknown"}</li>
-                </ul>
-              ))}
-            </li>
-            <li>
-                <strong>Phone (mobile):</strong>{" "}
-  {hasPhone ? (
-    methods.find(m => m.type === "phoneAuthenticationMethod").phoneNumber
-  ) : (
-    <>
-      ⚠️ Not registered. Recommended to register for additional MFA options.{" "}
-      <a
-        href="https://mysignins.microsoft.com/security-info"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="link"
-      >
-        Register here
-      </a>
-    </>
-  )}
-            </li>
-            <li><strong>Windows Hello:</strong> {hasWHfB ? "Configured" : "Not configured"}</li>
-          </ul>
-        </section>
+  
+<section className="card fade-in">
+  <h2>Security Summary</h2>
+  <ul>
+    <li>
+      <strong>Default Sign-in Method:</strong> {defaultMethod ? defaultMethod.type : "Unknown"}
+      {defaultMethod && (
+        <span>
+          {isRecommendedDefault ? " ✅ Recommended" : " ⚠️ Consider switching to Microsoft Authenticator"}
+        </span>
+      )}
+    </li>
+    <li><strong>MFA Enabled:</strong> {hasMFA ? "Yes" : "No"}</li>
+    <li>
+      <strong>Authenticator App:</strong> {hasAuthenticator ? "Registered" : "Not registered"}
+      {authenticatorDevices.map((a, idx) => (
+        <ul key={idx} className="sub-list">
+          <li>Device: {a.displayName || "-"}</li>
+          <li>Registered On: {a.createdDateTime ? new Date(a.createdDateTime).toLocaleString() : "-"}</li>
+          <li>Notifications Enabled: {a.isNotificationEnabled ? "Yes" : "Unknown"}</li>
+        </ul>
+      ))}
+    </li>
+    <li>
+      <strong>Phone (mobile):</strong>{" "}
+      {hasPhone ? (
+        methods.find(m => m.type === "phoneAuthenticationMethod").phoneNumber
+      ) : (
+        <>
+          ⚠️ Not registered. Recommended to register for additional MFA options.{" "}
+          <a
+            href="https://mysignins.microsoft.com/security-info"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link"
+          >
+            Register here
+          </a>
+        </>
+      )}
+    </li>
+    <li>
+      <strong>Windows Hello for Business:</strong>{" "}
+      {hasWHfB ? (
+        <>
+          Configured ({whfbTypeText})
+        </>
+      ) : (
+        <>
+          ⚠️ Not configured. WHfB is required for full passwordless readiness.{" "}
+          <a
+            href="https://learn.microsoft.com/windows/security/identity-protection/hello-for-business/hello-identity-verification"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link"
+          >
+            Configure WHfB
+          </a>
+        </>
+      )}
+    </li>
+  </ul>
+</section>
+
 
         {/* Recomendaciones */}
         {!ready && (
