@@ -138,8 +138,22 @@ export default function App() {
               ))}
             </li>
             <li>
-              <strong>Phone (mobile):</strong> {hasPhone ? methods.find(m => m.type==="phoneAuthenticationMethod").phoneNumber : "Not registered"}
-              {!hasPhone && <span> ⚠️ Recommended to register for additional MFA options</span>}
+                <strong>Phone (mobile):</strong>{" "}
+  {hasPhone ? (
+    methods.find(m => m.type === "phoneAuthenticationMethod").phoneNumber
+  ) : (
+    <>
+      ⚠️ Not registered. Recommended to register for additional MFA options.{" "}
+      <a
+        href="https://mysignins.microsoft.com/security-info"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="link"
+      >
+        Register here
+      </a>
+    </>
+  )}
             </li>
             <li><strong>Windows Hello:</strong> {hasWHfB ? "Configured" : "Not configured"}</li>
           </ul>
