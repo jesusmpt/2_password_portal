@@ -37,7 +37,7 @@ function App() {
       <h2>Authentication Methods:</h2>
       <ul>
         {data.availableMethods.map(m => (
-          <li key={m.type}>{m.type}: {m.displayName} {m.phoneNumber}</li>
+          {methodNamesMap[m.type] || m.type}: {m.displayName} {m.phoneNumber}
         ))}
       </ul>
 
