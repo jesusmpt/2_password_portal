@@ -41,7 +41,7 @@ jobs:
         working-directory: api
         run: |
           if [ -f "package.json" ]; then
-            npm ci
+            npm install
           fi
    
       - name: Install dependencies
