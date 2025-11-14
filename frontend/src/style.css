@@ -322,3 +322,31 @@ body {
     max-width: 100%;
   }
 }
+
+/* --- Session expired / network error styles --- */
+.session-expired-container {
+  max-width: 720px;
+  margin: 80px auto;
+  text-align: center;
+}
+
+.session-expired-container .card {
+  padding: 28px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.success-banner {
+  border-left: 5px solid var(--success);
+  background: rgba(10, 143, 51, 0.05);
+  padding: 18px 20px;
+  border-radius: 10px;
+}
