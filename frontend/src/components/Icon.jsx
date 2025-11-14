@@ -1,7 +1,7 @@
 // src/components/Icon.jsx
 export default function Icon({ name, size = 22, className = "" }) {
   const iconMap = {
-    success: ✔️",
+    success: "✔️",
     warning: "⚠️",
     error: "❌",
     info: "ℹ️",
