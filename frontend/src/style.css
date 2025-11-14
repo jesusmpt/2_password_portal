@@ -1,95 +1,64 @@
-/* =======================================================
-   ASTARA SECURITY PORTAL - PREMIUM ENTERPRISE THEME
-   UX + Branding + Animations + Dark/Light Mode
-   ======================================================= */
+/* -----------------------------------------------------------
+   GLOBAL STYLES — Premium Corporate
+   ----------------------------------------------------------- */
 
-/* ---------- BRAND VARIABLES ---------- */
 :root {
-  /* Primary brand colors (Astara-inspired) */
-  --primary: #005a8e;
-  --primary-dark: #003c63;
-  --primary-light: #0090d9;
-
-  /* Secondary brand colors */
-  --accent: #00a7ff;
-  --accent-light: #d9f1ff;
-
-  /* State colors */
-  --success: #0a8f33;
-  --success-bg: #e4f9ed;
-
-  --warning: #d18a00;
-  --warning-bg: #fff6d8;
-
-  --danger: #d62828;
-  --danger-bg: #ffe1e1;
-
-  --info: #007cc0;
-  --info-bg: #e7f5ff;
-
-  /* Neutrals */
-  --text: #1c1f22;
-  --text-muted: #555;
-  --bg: #f5f7fa;
+  --bg: #f4f6f8;
   --card-bg: #ffffff;
-
-  /* UI */
+  --text: #1e1e1e;
+  --text-light: #555;
+  --border: #e3e3e3;
+  --accent: #2a6df4;
+  --accent-soft: #e8efff;
+  --success: #0a8f33;
+  --warning: #d98327;
+  --error: #d0342c;
   --radius: 14px;
-  --shadow: 0px 4px 28px rgba(0,0,0,0.06);
-  --shadow-hover: 0px 6px 34px rgba(0,0,0,0.10);
-
-  /* Transitions */
-  --tr: 0.25s ease;
+  --shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-/* ---------- AUTO DARK MODE ---------- */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0d1117;
-    --card-bg: #161b22;
-    --text: #e6edf3;
-    --text-muted: #9aa4b3;
-
-    --shadow: 0px 4px 22px rgba(0,0,0,0.55);
-    --shadow-hover: 0px 6px 28px rgba(0,0,0,0.7);
+    --bg: #0f1115;
+    --card-bg: #1a1d23;
+    --text: #fafafa;
+    --text-light: #a5a5a5;
+    --border: #333;
+    --accent: #4b8dff;
+    --accent-soft: #1a2a4d;
+    --success: #3edc82;
+    --warning: #ffb454;
   }
 }
 
-/* ---------- RESET ---------- */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
-}
-
 body {
+  margin: 0;
   background: var(--bg);
+  font-family: "Segoe UI", Roboto, sans-serif;
   color: var(--text);
-  line-height: 1.5;
-  transition: background var(--tr), color var(--tr);
+  -webkit-font-smoothing: antialiased;
+  padding: 0;
 }
 
-/* ---------- PAGE LAYOUT ---------- */
 .page {
-  max-width: 1200px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 32px 20px;
-  animation: fadeIn 0.5s ease;
+  padding: 24px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* -----------------------------------------------------------
+   HEADER
+   ----------------------------------------------------------- */
 
-/* ---------- HEADER ---------- */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 25px;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
+  background: var(--card-bg);
+  padding: 20px 32px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
 }
 
 .branding {
@@ -99,170 +68,257 @@ body {
 }
 
 .logo {
-  height: 38px;
-  filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.08));
+  height: 44px;
 }
 
 .header h1 {
-  font-size: 1.9rem;
+  margin: 0;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary-dark);
 }
 
-/* ---------- CARDS ---------- */
+/* -----------------------------------------------------------
+   CARD
+   ----------------------------------------------------------- */
+
 .card {
   background: var(--card-bg);
-  padding: 26px;
+  padding: 24px 28px;
   border-radius: var(--radius);
-  margin-bottom: 26px;
   box-shadow: var(--shadow);
-  transition: box-shadow var(--tr), transform var(--tr);
-}
-
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-hover);
+  margin-bottom: 24px;
 }
 
 .card h2 {
-  font-size: 1.45rem;
-  margin-bottom: 14px;
-  font-weight: 600;
-  color: var(--primary-dark);
+  margin-top: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
-/* ---------- PROGRESS BAR ---------- */
+/* -----------------------------------------------------------
+   USER INFO
+   ----------------------------------------------------------- */
+
+.user-info p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+}
+
+/* -----------------------------------------------------------
+   PROGRESS BAR
+   ----------------------------------------------------------- */
+
 .progress-bar {
   width: 100%;
-  background: #dfe6ed;
-  border-radius: 50px;
+  height: 26px;
+  background: var(--accent-soft);
+  border-radius: 40px;
   overflow: hidden;
-  height: 28px;
+  margin: 16px 0;
+  position: relative;
 }
 
 .progress-fill {
   height: 100%;
-  font-size: 0.9rem;
-  font-weight: 700;
+  background: var(--accent);
   color: #fff;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  background: linear-gradient(90deg, var(--primary-dark), var(--primary-light));
-  transition: width 0.6s ease-in-out;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 40px;
+  transition: width 0.4s ease;
 }
 
-/* ---------- ALERTS ---------- */
-.ok, .warn, .danger, .info {
+/* status messages */
+
+.warn {
+  color: var(--warning);
   font-weight: 600;
+  margin-top: 10px;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 6px;
 }
 
-.ok { color: var(--success); }
-.warn { color: var(--warning); }
-.danger { color: var(--danger); }
-.info { color: var(--info); }
-
-/* ---------- BADGES ---------- */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  font-size: 0.9rem;
+.ok {
+  color: var(--success);
   font-weight: 600;
-  margin-top: 6px;
-}
-
-.badge-success { background: var(--success-bg); color: var(--success); }
-.badge-warning { background: var(--warning-bg); color: var(--warning); }
-.badge-danger { background: var(--danger-bg); color: var(--danger); }
-.badge-info { background: var(--info-bg); color: var(--info); }
-
-/* ---------- STEPS ---------- */
-.step {
-  padding: 18px;
-  border-left: 4px solid var(--primary);
-  border-radius: 10px;
-  background: #f8fbff;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.step-left { max-width: 75%; }
-.step strong { font-size: 1.05rem; color: var(--primary-dark); }
-.step .desc { color: var(--text-muted); margin-top: 5px; }
-
-/* ---------- LINKS & BUTTONS ---------- */
-a {
-  color: var(--primary);
-  text-decoration: none;
-  transition: color var(--tr);
-}
-
-a:hover { color: var(--primary-dark); }
-
-.btn-link {
-  background: var(--primary);
-  color: #fff;
-  padding: 11px 18px;
-  border-radius: 13px;
-  font-weight: 600;
-  transition: background var(--tr), transform var(--tr);
-}
-
-.btn-link:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-}
-
-/* Refresh button */
-.refresh {
   margin-top: 10px;
-  padding: 13px 24px;
-  border-radius: 12px;
-  border: none;
-  background: var(--primary-dark);
-  color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: var(--tr);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.refresh:hover {
-  background: var(--primary);
-  transform: translateY(-2px);
+/* -----------------------------------------------------------
+   SUCCESS BANNER
+   ----------------------------------------------------------- */
+
+.success-banner {
+  border-left: 5px solid var(--success);
+  background: rgba(10, 143, 51, 0.05);
+  padding: 18px 20px;
 }
 
-/* ---------- METHOD CARDS ---------- */
+/* -----------------------------------------------------------
+   SECURITY SUMMARY
+   ----------------------------------------------------------- */
+
 .auth-method {
-  padding: 14px;
-  background: #f3f6fa;
-  border-radius: 12px;
-  margin-bottom: 12px;
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
 }
 
 .auth-method-title {
-  font-size: 1.05rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  color: var(--primary-dark);
+  color: var(--text-light);
 }
 
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 768px) {
+/* -----------------------------------------------------------
+   BADGES
+   ----------------------------------------------------------- */
+
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.badge-success {
+  background: rgba(10, 143, 51, 0.18);
+  color: var(--success);
+}
+
+.badge-warning {
+  background: rgba(224, 144, 30, 0.18);
+  color: var(--warning);
+}
+
+.badge-info {
+  background: rgba(70, 131, 255, 0.18);
+  color: var(--accent);
+}
+
+/* -----------------------------------------------------------
+   RECOMMENDED ACTIONS
+   ----------------------------------------------------------- */
+
+.step {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: var(--accent-soft);
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  transition: background 0.2s ease;
+}
+
+.step:hover {
+  background: rgba(42, 109, 244, 0.12);
+}
+
+.step-left {
+  max-width: 70%;
+}
+
+.step .desc {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-top: 6px;
+}
+
+.step-right {
+  display: flex;
+  align-items: center;
+}
+
+/* -----------------------------------------------------------
+   BUTTONS / LINKS
+   ----------------------------------------------------------- */
+
+.btn-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px dashed var(--accent);
+  padding-bottom: 2px;
+}
+
+.btn-link:hover {
+  opacity: 0.8;
+}
+
+.refresh {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 12px 22px;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: background 0.2s ease;
+}
+
+.refresh:hover {
+  background: #1e56c4;
+}
+
+/* -----------------------------------------------------------
+   ICONS
+   ----------------------------------------------------------- */
+
+.icon {
+  width: 18px;
+  height: 18px;
+  color: var(--text);
+}
+
+/* -----------------------------------------------------------
+   STATUS MESSAGES
+   ----------------------------------------------------------- */
+
+.error {
+  background: rgba(208, 52, 44, 0.16);
+  padding: 12px 18px;
+  color: var(--error);
+  border-radius: var(--radius);
+}
+
+.loading {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* -----------------------------------------------------------
+   RESPONSIVE
+   ----------------------------------------------------------- */
+
+@media (max-width: 760px) {
+  .header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
   .step {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 12px;
   }
-  .step-right {
-    margin-top: 10px;
+
+  .step-left {
+    max-width: 100%;
   }
 }
