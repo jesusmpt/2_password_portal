@@ -1,25 +1,268 @@
-body, html { margin:0; font-family: 'Segoe UI', sans-serif; background:#f7f9fa; color:#333; }
-.page { max-width: 900px; margin: auto; padding: 16px; }
-.header { display:flex; justify-content:space-between; align-items:center; padding:16px; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.1); border-radius:8px; margin-bottom:16px;}
-.branding { display:flex; align-items:center; gap:12px; }
-.logo { height:40px; }
-.main { display:flex; flex-direction:column; gap:16px; }
-.card { background:#fff; padding:16px; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.1); }
-.progress-bar { background:#e2e8f0; border-radius:8px; overflow:hidden; height:24px; margin-bottom:8px; }
-.progress-fill { background:#4f46e5; height:100%; text-align:center; color:#fff; font-weight:bold; transition: width 1s ease; line-height:24px; }
-.progress-fill.complete { background:#16a34a; }
-.progress-status.ok { color:#16a34a; font-weight:bold; }
-.progress-status.warn { color:#f59e0b; font-weight:bold; }
-.sub-list { margin-left:16px; font-size:0.9em; color:#555; }
-.step { display:flex; justify-content:space-between; margin-bottom:12px; align-items:center; }
-.step-left { display:flex; flex-direction:column; }
-.btn-link { background:#4f46e5; color:#fff; padding:6px 12px; border-radius:4px; text-decoration:none; transition:all 0.3s; }
-.btn-link:hover { background:#4338ca; }
-.fade-in { animation:fadeIn 0.6s ease-in; }
-.icon { width:20px; height:20px; vertical-align:middle; margin-right:4px; }
-.icon-check { color:#16a34a; }
-.icon-warning { color:#f59e0b; }
-.icon-gear { color:#4f46e5; }
-@keyframes fadeIn { from {opacity:0} to {opacity:1} }
-button.refresh { padding:8px 16px; background:#4f46e5; color:#fff; border:none; border-radius:4px; cursor:pointer; transition:all 0.3s; }
-button.refresh:hover { background:#4338ca; }
+/* =======================================================
+   ASTARA SECURITY PORTAL - PREMIUM ENTERPRISE THEME
+   UX + Branding + Animations + Dark/Light Mode
+   ======================================================= */
+
+/* ---------- BRAND VARIABLES ---------- */
+:root {
+  /* Primary brand colors (Astara-inspired) */
+  --primary: #005a8e;
+  --primary-dark: #003c63;
+  --primary-light: #0090d9;
+
+  /* Secondary brand colors */
+  --accent: #00a7ff;
+  --accent-light: #d9f1ff;
+
+  /* State colors */
+  --success: #0a8f33;
+  --success-bg: #e4f9ed;
+
+  --warning: #d18a00;
+  --warning-bg: #fff6d8;
+
+  --danger: #d62828;
+  --danger-bg: #ffe1e1;
+
+  --info: #007cc0;
+  --info-bg: #e7f5ff;
+
+  /* Neutrals */
+  --text: #1c1f22;
+  --text-muted: #555;
+  --bg: #f5f7fa;
+  --card-bg: #ffffff;
+
+  /* UI */
+  --radius: 14px;
+  --shadow: 0px 4px 28px rgba(0,0,0,0.06);
+  --shadow-hover: 0px 6px 34px rgba(0,0,0,0.10);
+
+  /* Transitions */
+  --tr: 0.25s ease;
+}
+
+/* ---------- AUTO DARK MODE ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --card-bg: #161b22;
+    --text: #e6edf3;
+    --text-muted: #9aa4b3;
+
+    --shadow: 0px 4px 22px rgba(0,0,0,0.55);
+    --shadow-hover: 0px 6px 28px rgba(0,0,0,0.7);
+  }
+}
+
+/* ---------- RESET ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  transition: background var(--tr), color var(--tr);
+}
+
+/* ---------- PAGE LAYOUT ---------- */
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- HEADER ---------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 25px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.branding {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  height: 38px;
+  filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.08));
+}
+
+.header h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+/* ---------- CARDS ---------- */
+.card {
+  background: var(--card-bg);
+  padding: 26px;
+  border-radius: var(--radius);
+  margin-bottom: 26px;
+  box-shadow: var(--shadow);
+  transition: box-shadow var(--tr), transform var(--tr);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+.card h2 {
+  font-size: 1.45rem;
+  margin-bottom: 14px;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+/* ---------- PROGRESS BAR ---------- */
+.progress-bar {
+  width: 100%;
+  background: #dfe6ed;
+  border-radius: 50px;
+  overflow: hidden;
+  height: 28px;
+}
+
+.progress-fill {
+  height: 100%;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary-light));
+  transition: width 0.6s ease-in-out;
+}
+
+/* ---------- ALERTS ---------- */
+.ok, .warn, .danger, .info {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ok { color: var(--success); }
+.warn { color: var(--warning); }
+.danger { color: var(--danger); }
+.info { color: var(--info); }
+
+/* ---------- BADGES ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.badge-success { background: var(--success-bg); color: var(--success); }
+.badge-warning { background: var(--warning-bg); color: var(--warning); }
+.badge-danger { background: var(--danger-bg); color: var(--danger); }
+.badge-info { background: var(--info-bg); color: var(--info); }
+
+/* ---------- STEPS ---------- */
+.step {
+  padding: 18px;
+  border-left: 4px solid var(--primary);
+  border-radius: 10px;
+  background: #f8fbff;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.step-left { max-width: 75%; }
+.step strong { font-size: 1.05rem; color: var(--primary-dark); }
+.step .desc { color: var(--text-muted); margin-top: 5px; }
+
+/* ---------- LINKS & BUTTONS ---------- */
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color var(--tr);
+}
+
+a:hover { color: var(--primary-dark); }
+
+.btn-link {
+  background: var(--primary);
+  color: #fff;
+  padding: 11px 18px;
+  border-radius: 13px;
+  font-weight: 600;
+  transition: background var(--tr), transform var(--tr);
+}
+
+.btn-link:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+/* Refresh button */
+.refresh {
+  margin-top: 10px;
+  padding: 13px 24px;
+  border-radius: 12px;
+  border: none;
+  background: var(--primary-dark);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--tr);
+}
+
+.refresh:hover {
+  background: var(--primary);
+  transform: translateY(-2px);
+}
+
+/* ---------- METHOD CARDS ---------- */
+.auth-method {
+  padding: 14px;
+  background: #f3f6fa;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.auth-method-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .step {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .step-right {
+    margin-top: 10px;
+  }
+}

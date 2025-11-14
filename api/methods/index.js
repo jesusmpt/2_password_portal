@@ -7,7 +7,7 @@ export default async function (context, req) {
     const clientId = process.env.AZURE_CLIENT_ID;
     const clientSecret = process.env.AZURE_CLIENT_SECRET;
 
-    // === Token ===
+    // Obtener token de aplicación
     const tokenResponse = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -20,88 +20,79 @@ export default async function (context, req) {
     });
 
     const tokenData = await tokenResponse.json();
-    if (!tokenData.access_token) throw new Error('No se pudo obtener el token de acceso');
+    const accessToken = tokenData.access_token;
 
-    const client = Client.init({ authProvider: done => done(null, tokenData.access_token) });
+    const client = Client.init({ authProvider: done => done(null, accessToken) });
 
     const userId = req.headers['x-ms-client-principal-id'];
-    if (!userId) throw new Error('Falta x-ms-client-principal-id');
 
-    // === Info del usuario ===
+    // Información básica del usuario
     const user = await client
       .api(`/users/${userId}`)
       .select('displayName,givenName,surname,mail,userPrincipalName')
       .get();
 
-    // === Métodos de autenticación ===
-    const [methodsResponse, phoneResponse] = await Promise.all([
-      client.api(`/users/${userId}/authentication/methods`).get().catch(() => ({ value: [] })),
-      client.api(`/users/${userId}/authentication/phoneMethods`).get().catch(() => ({ value: [] }))
-    ]);
+    // Métodos de autenticación
+    const methodsResponse = await client.api(`/users/${userId}/authentication/methods`).get();
 
-    // === Unir métodos ===
-    const rawMethods = [
-      ...methodsResponse.value,
-      ...phoneResponse.value
+    // Métodos de teléfono
+    const phoneResponse = await client.api(`/users/${userId}/authentication/phoneMethods`).get();
+
+    // Unimos resultados
+    const availableMethods = [
+      ...methodsResponse.value.map(m => ({
+        type: m['@odata.type'].split('.').pop(),
+        displayName: m.displayName || '',
+        phoneNumber: m.phoneNumber || '',
+        isDefault: m.isDefault || false,
+        methodType: m.methodType || ''
+      })),
+      ...phoneResponse.value.map(p => ({
+        type: 'phoneAuthenticationMethod',
+        displayName: p.displayName || '',
+        phoneNumber: p.phoneNumber || '',
+        methodType: p.phoneType || ''
+      }))
     ];
 
-    // === Limpieza y etiquetas amigables ===
-    const availableMethods = rawMethods.map(m => {
-      const type = m['@odata.type'] ? m['@odata.type'].split('.').pop() : 'unknown';
-      const friendlyNames = {
-        passwordAuthenticationMethod: 'Password (Legacy)',
-        microsoftAuthenticatorAuthenticationMethod: 'Authenticator Application',
-        phoneAuthenticationMethod: 'Mobile Phone',
-        fido2AuthenticationMethod: 'FIDO2 Security Key',
-        softwareOathAuthenticationMethod: 'Software Token (OATH)',
-        windowsHelloForBusinessAuthenticationMethod: 'Windows Hello for Business'
-      };
-      return {
-        type,
-        name: friendlyNames[type] || type,
-        phoneNumber: m.phoneNumber || '',
-        model: m.model || '',
-        isDefault: m.isDefault || false,
-        methodType: m.phoneType || ''
-      };
-    });
-
-    // === Eliminar duplicados de teléfono ===
-    const uniqueMethods = availableMethods.filter(
-      (m, i, self) => !(m.type === 'phoneAuthenticationMethod' && i !== self.findIndex(x => x.phoneNumber === m.phoneNumber))
+    // Identificar MFA activo
+    const mfaMethods = availableMethods.filter(m =>
+      ['microsoftAuthenticatorAuthenticationMethod', 'phoneAuthenticationMethod', 'softwareOathAuthenticationMethod'].includes(m.type)
     );
+    const hasMFA = mfaMethods.length > 0;
 
-    // === MFA ===
-    const mfaRelated = ['microsoftAuthenticatorAuthenticationMethod', 'phoneAuthenticationMethod', 'softwareOathAuthenticationMethod'];
-    const hasMFA = uniqueMethods.some(m => mfaRelated.includes(m.type));
-    const mfaDevice = uniqueMethods.find(m => m.type === 'microsoftAuthenticatorAuthenticationMethod')?.model || null;
-    const mfaPhone = uniqueMethods.find(m => m.type === 'phoneAuthenticationMethod')?.phoneNumber || null;
+    // Detectar Windows Hello
+    const hasWHfB = availableMethods.some(m => m.type === 'windowsHelloForBusinessAuthenticationMethod');
 
-    // === WHfB ===
-    const hasWHfB = uniqueMethods.some(m => m.type === 'windowsHelloForBusinessAuthenticationMethod');
-
-    // === Métodos faltantes para passwordless ===
-    const passwordlessMethods = ['microsoftAuthenticatorAuthenticationMethod', 'fido2AuthenticationMethod'];
+    // Passwordless principal: solo Authenticator (FIDO2 removido)
+    const passwordlessMethods = ['microsoftAuthenticatorAuthenticationMethod'];
     const missingPasswordless = passwordlessMethods.filter(
-      m => !uniqueMethods.some(am => am.type.toLowerCase() === m.toLowerCase())
+      m => !availableMethods.some(am => am.type.toLowerCase() === m.toLowerCase())
     );
 
-    // === Respuesta ===
+    // Información extra: dispositivo Authenticator y número de móvil
+    const authenticatorDevices = availableMethods
+      .filter(m => m.type === 'microsoftAuthenticatorAuthenticationMethod')
+      .map(m => m.displayName);
+
+    const phoneNumbers = availableMethods
+      .filter(m => m.type === 'phoneAuthenticationMethod' && m.phoneNumber)
+      .map(m => ({ number: m.phoneNumber, type: m.methodType }));
+
     context.res = {
       status: 200,
       body: {
         user,
-        availableMethods: uniqueMethods,
+        availableMethods,
+        missingPasswordless,
         hasMFA,
-        mfaDevice,
-        mfaPhone,
         hasWHfB,
-        missingPasswordless
+        authenticatorDevices,
+        phoneNumbers
       }
     };
-
   } catch (error) {
-    console.error('Error en /api/methods:', error);
+    console.error(error);
     context.res = { status: 500, body: { error: error.message } };
   }
 }
