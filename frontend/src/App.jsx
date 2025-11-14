@@ -271,10 +271,3 @@ export default function App() {
 }
 
 // small helper Icon wrapper to support inline Icon usage in JSX
- function Icon({ name }) {
-  // simple inline icons or reuse the Icon component file above
-  // here we inline minimal shapes to avoid additional imports
-  if (name === "check") return <svg className="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>;
-  if (name === "shield") return <svg className="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 2l7 3v5c0 5-3.4 9.7-7 11-3.6-1.3-7-6-7-11V5l7-3z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>;
-  return null;
-}
